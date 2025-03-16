@@ -1,0 +1,78 @@
+
+
+3. Make the script files executable:
+```bash
+chmod +x init-db.sh \
+         generate_normal_traffic.sh \
+         attack_scenario1.sh \
+         attack_scenario2.sh \
+         attack_scenario3.sh \
+         attack_scenario4.sh
+```
+
+4. Deployment steps:
+```bash
+# Navigate to the project directory
+cd ~/cs-demo
+
+# Start the containers
+docker-compose up -d
+
+# Initialize the database
+./init-db.sh
+
+# Start Suricata in IDS mode
+docker exec -it ids-server bash
+
+# Inside the container
+mkdir -p /etc/suricata/rules
+cp /etc/suricata/suricata.rules /etc/suricata/rules/
+suricata -c /etc/suricata/suricata.yaml -i eth0 -D
+exit
+```
+
+5. Running the demonstration:
+```bash
+# Generate normal traffic
+./generate_normal_traffic.sh
+
+# Run attack scenarios (with 30-second pauses between)
+./attack_scenario1.sh
+sleep 30
+./attack_scenario2.sh
+sleep 30
+./attack_scenario3.sh
+sleep 30
+./attack_scenario4.sh
+```
+
+Monitoring and Verification:
+- Kibana: http://localhost:5601
+- EVEBox: http://localhost:5636
+- Elasticsearch: http://localhost:9200
+
+Cleanup:
+```bash
+# Stop and remove containers
+docker-compose down
+
+# Remove volumes
+docker volume prune -f
+```
+
+Key Troubleshooting Commands:
+```bash
+# Check container status
+docker ps
+
+# View Suricata logs
+docker exec ids-server cat /var/log/suricata/fast.log
+
+# Check Logstash logs
+docker logs logstash
+
+# Verify Elasticsearch indices
+curl -X GET "localhost:9200/_cat/indices?v"
+```
+
+Would you like me to elaborate on any specific part of the setup or provide additional guidance?

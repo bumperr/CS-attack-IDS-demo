@@ -1,0 +1,50 @@
+# Simplified Suricata config for demonstration
+
+vars:
+  address-groups:
+    HOME_NET: "[172.18.0.0/24]"
+    EXTERNAL_NET: "!$HOME_NET"
+
+  port-groups:
+    HTTP_PORTS: "80"
+    SHELLCODE_PORTS: "!80"
+    SSH_PORTS: "22"
+    SQL_PORTS: "3306"
+
+default-rule-path: /etc/suricata/rules
+rule-files:
+  - suricata.rules
+
+af-packet:
+  - interface: eth0
+    cluster-id: 99
+    cluster-type: cluster_flow
+    defrag: yes
+
+outputs:
+  - fast:
+      enabled: yes
+      filename: fast.log
+      append: yes
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: eve.json
+      types:
+        - alert
+        - http
+        - dns
+        - tls
+        - ssh
+        - flow
+
+app-layer:
+  protocols:
+    tls:
+      enabled: yes
+    http:
+      enabled: yes
+    ssh:
+      enabled: yes
+    mysql:
+      enabled: yes
