@@ -1,0 +1,28 @@
+# Use an official Ubuntu base image
+FROM ubuntu:22.04
+
+# Set environment variable to avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Update the package list and install Suricata and necessary tools
+RUN apt-get update && \
+    apt-get install -y \
+    suricata \
+    net-tools \
+    tcpdump \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create directory for Suricata rules
+RUN mkdir -p /etc/suricata/rules
+
+# Copy your Suricata configuration and rule files into the container
+COPY suricata-config/suricata.yaml /etc/suricata/suricata.yaml
+COPY suricata-config/rules/suricata.rules /etc/suricata/rules/suricata.rules
+
+# Expose the Suricata log directory as a volume
+VOLUME /var/log/suricata
+
+# Set the entrypoint to start Suricata with the provided configuration
+CMD ["suricata", "-c", "/etc/suricata/suricata.yaml", "-i", "eth0"]
+

@@ -51,18 +51,16 @@ services:
       demo_network:
         ipv4_address: 172.18.0.40
 
-  # IDS monitoring system
+  # IDS monitoring system (Suricata)
   ids-server:
-    image: ubuntu:22.04
+    build: .
     container_name: ids-server
     hostname: ids-server
-    command: bash -c "apt-get update && apt-get install -y suricata net-tools tcpdump && tail -f /dev/null"
     cap_add:
       - NET_ADMIN
       - NET_RAW
     volumes:
-      - ./suricata-config:/etc/suricata
-      - ./suricata-logs:/var/log/suricata
+      - suricata-logs:/var/log/suricata
     networks:
       demo_network:
         ipv4_address: 172.18.0.50
@@ -86,7 +84,7 @@ services:
     volumes:
       - ./logstash/config:/usr/share/logstash/config
       - ./logstash/pipeline:/usr/share/logstash/pipeline
-      - ./suricata-logs:/suricata-logs
+      - suricata-logs:/suricata-logs
     ports:
       - "5044:5044"
     depends_on:
@@ -131,3 +129,6 @@ networks:
     ipam:
       config:
         - subnet: 172.18.0.0/24
+
+volumes:
+  suricata-logs:

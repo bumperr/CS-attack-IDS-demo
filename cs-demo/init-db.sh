@@ -5,6 +5,7 @@ sleep 10
 
 # Connect to MySQL and create sample data
 docker exec db-server mysql -u root -ppassword << 'SQL'
+DROP TABLE IF EXISTS customer_db;
 CREATE DATABASE IF NOT EXISTS customer_db;
 USE customer_db;
 CREATE TABLE customers (
