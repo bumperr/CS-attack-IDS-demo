@@ -8,7 +8,7 @@ echo "Generating normal traffic..."
 for i in {1..30}; do
     docker exec cloud-server curl -s http://172.18.0.40/api/status > /dev/null
     docker exec cloud-server curl -s http://172.18.0.40/api/data > /dev/null
-    sleep 2
+    sleep 1
 done
 
 # MySQL queries

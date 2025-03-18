@@ -4,7 +4,7 @@
 alert tcp any any -> $HOME_NET any (msg:"SUSPICIOUS Config File Modification Attempt"; content:"config"; content:"modify"; distance:0; within:50; classtype:attempted-admin; sid:5000001; rev:1;)
 
 # Rule for database service disruption (Risk #4)
-alert tcp any any -> $HOME_NET 3306 (msg:"POTENTIAL MySQL DDoS Attack"; flags:S; threshold:type threshold, track by_src, count 100, seconds 5; classtype:attempted-dos; sid:5000002; rev:1;)
+alert tcp any any -> $HOME_NET 3306 (msg:"POTENTIAL MySQL DDoS Attack"; flags:S; threshold:type threshold, track by_src, count 60, seconds 10; classtype:attempted-dos; sid:5000002; rev:1;)
 
 # Rule for API service disruption (Risk #10)
 alert tcp any any -> $HOME_NET 80 (msg:"CRITICAL Buffer Overflow Attempt at API Endpoint"; content:"/api/"; content:"%00"; distance:0; pcre:"/(%[0-9a-fA-F]{2}){20,}/"; classtype:web-application-attack; sid:5000003; rev:1;)

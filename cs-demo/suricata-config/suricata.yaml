@@ -16,12 +16,19 @@ vars:
 default-rule-path: /etc/suricata/rules
 rule-files:
   - suricata.rules
+  - suricata.rules
+  - tls-events.rules
+  - http-events.rules
+  - dns-events.rules
 
 af-packet:
-  - interface: eth0
-    cluster-id: 99
-    cluster-type: cluster_flow
-    defrag: yes
+ - interface: eth0
+   threads: auto
+   cluster-id: 99
+   cluster-type: cluster_flow
+   defrag: yes
+   promisc: yes
+   copy-mode: ips
 
 outputs:
   - fast:

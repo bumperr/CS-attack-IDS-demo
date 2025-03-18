@@ -16,13 +16,12 @@ RUN apt-get update && \
 # Create directory for Suricata rules
 RUN mkdir -p /etc/suricata/rules
 
-# Copy your Suricata configuration and rule files into the container
+# Copy your custom Suricata configuration and rule files (optional override)
 COPY suricata-config/suricata.yaml /etc/suricata/suricata.yaml
 COPY suricata-config/rules/suricata.rules /etc/suricata/rules/suricata.rules
 
 # Expose the Suricata log directory as a volume
-VOLUME /var/log/suricata
+VOLUME /suricata-logs
 
 # Set the entrypoint to start Suricata with the provided configuration
 CMD ["suricata", "-c", "/etc/suricata/suricata.yaml", "-i", "eth0"]
-

@@ -48,7 +48,7 @@ sleep 30
 
 Monitoring and Verification:
 - Kibana: http://localhost:5601
-- EVEBox: http://localhost:5636
+- EVEBox: https://localhost:5636
 - Elasticsearch: http://localhost:9200
 
 Cleanup:
