@@ -61,9 +61,11 @@ services:
     
     volumes:
       - suricata-logs:/var/log/suricata
-    networks:
-      demo_network:
-        ipv4_address: 172.18.0.50
+    # networks:
+    #   demo_network:
+    #     ipv4_address: 172.18.0.50
+
+    network_mode: host
 
   # ELK Stack (Elasticsearch, Logstash, Kibana)
   elasticsearch:
