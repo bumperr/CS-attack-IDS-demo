@@ -1,17 +1,22 @@
-
 services:
   # Attacker machine
   attacker:
     image: kalilinux/kali-rolling
     container_name: attacker
     hostname: attacker
-    command: bash -c "apt-get update && apt-get install -y nmap hping3 netcat-traditional python3 sqlmap && tail -f /dev/null"
+    command: >
+      bash -c "
+      apt-get update &&
+      apt-get install -y nmap hping3 netcat-traditional python3 sqlmap nikto dirb curl metasploit-framework &&
+      tail -f /dev/null"
     cap_add:
       - NET_ADMIN
       - NET_RAW
     networks:
       demo_network:
         ipv4_address: 172.18.0.10
+    depends_on:
+      - ids-server  # Changed from traffic-tap to ensure Suricata is up
 
   # Cloud infrastructure simulation
   cloud-server:
@@ -22,6 +27,8 @@ services:
     networks:
       demo_network:
         ipv4_address: 172.18.0.20
+    depends_on:
+      - ids-server
 
   # Database server
   db-server:
@@ -36,6 +43,8 @@ services:
     networks:
       demo_network:
         ipv4_address: 172.18.0.30
+    depends_on:
+      - ids-server
 
   # API gateway (using Nginx)
   api-gateway:
@@ -49,25 +58,33 @@ services:
     networks:
       demo_network:
         ipv4_address: 172.18.0.40
+    depends_on:
+      - ids-server
 
   # IDS monitoring system (Suricata)
   ids-server:
     build: .
     container_name: ids-server
     hostname: ids-server
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-    
     volumes:
       - suricata-logs:/var/log/suricata
     # networks:
     #   demo_network:
     #     ipv4_address: 172.18.0.50
 
-    network_mode: host
-
-  # ELK Stack (Elasticsearch, Logstash, Kibana)
+    network_mode: host 
+    
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_ADMIN
+    privileged: true
+    command: >
+      sh -c "
+         suricata -c /etc/suricata/suricata.yaml -q 0"
+    depends_on:
+      - elasticsearch
+  # ELK Stack
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
     container_name: elasticsearch
@@ -125,9 +142,14 @@ services:
       demo_network:
         ipv4_address: 172.18.0.60
 
+  # Remove traffic-tap (replaced by ids-server iptables)
+  # traffic-tap: Removed
+
 networks:
   demo_network:
     driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_ip_masquerade: "true"
     ipam:
       config:
         - subnet: 172.18.0.0/24

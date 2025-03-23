@@ -16,25 +16,50 @@ vars:
 default-rule-path: /etc/suricata/rules
 rule-files:
   - suricata.rules
-  - suricata.rules
-  - tls-events.rules
-  - http-events.rules
-  - dns-events.rules
+ 
 
 af-packet:
- - interface: eth0
-   threads: auto
-   cluster-id: 99
-   cluster-type: cluster_flow
-   defrag: yes
-   promisc: yes
-   copy-mode: ips
+  - interface: eth0
+    cluster-type: cluster_flow
+    cluster-id: 99
+    defrag: yes
+    use-mmap: yes
+    tpacket-v3: yes
+  
+  - interface: docker0
+    cluster-type: cluster_flow
+    cluster-id: 98
+    defrag: yes
 
+app-layer:
+  protocols:
+    tls:
+      enabled: yes
+    http:
+      enabled: yes
+      libhtp:
+        default-config:
+          # Aggressive detection
+          validate-headers: yes
+          doubled-headers: yes
+          unzip: yes
+          parse-on-type: yes
+    ssh:
+      enabled: yes
+    mysql:
+      enabled: yes
+    dns:
+      enabled: yes
+    rdp:
+      enabled: yes
+
+# Enhanced logging
 outputs:
   - fast:
       enabled: yes
       filename: fast.log
       append: yes
+  
   - eve-log:
       enabled: yes
       filetype: regular
@@ -46,14 +71,25 @@ outputs:
         - tls
         - ssh
         - flow
+        - drop
+    
 
-app-layer:
-  protocols:
-    tls:
-      enabled: yes
-    http:
-      enabled: yes
-    ssh:
-      enabled: yes
-    mysql:
-      enabled: yes
+# Performance and detection tuning
+detect:
+  # Aggressive detection mode
+  profile: custom
+  custom-detect-profile-file: /etc/suricata/custom-detect.yaml
+
+  # Increase performance
+  max-pending-packets: 65535
+  cuda:
+    mode: auto
+
+# Advanced detection capabilities
+reputation:
+  # Enable IP reputation tracking
+  enabled: yes
+  # Configure reputation sources
+  sources:
+    - name: emergingthreatspro
+      url: https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt

@@ -8,20 +8,23 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y \
     suricata \
+    iptables \
+    iproute2 \
     net-tools \
     tcpdump \
     curl \
+    && update-alternatives --set iptables /usr/sbin/iptables-legacy \
     && rm -rf /var/lib/apt/lists/*
 
-# Create directory for Suricata rules
-RUN mkdir -p /etc/suricata/rules
+# Create directory for Suricata rules and logs
+RUN mkdir -p /etc/suricata/rules /var/log/suricata
 
-# Copy your custom Suricata configuration and rule files (optional override)
+# Copy your custom Suricata configuration and rule files
 COPY suricata-config/suricata.yaml /etc/suricata/suricata.yaml
 COPY suricata-config/rules/suricata.rules /etc/suricata/rules/suricata.rules
 
 # Expose the Suricata log directory as a volume
-VOLUME /suricata-logs
+VOLUME /var/log/suricata
 
-# Set the entrypoint to start Suricata with the provided configuration
-CMD ["suricata", "-c", "/etc/suricata/suricata.yaml", "-i", "eth0"]
+# Default command (can be overridden in docker-compose.yml)
+# CMD ["suricata", "-c", "/etc/suricata/suricata.yaml", "-q", "0"]

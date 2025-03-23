@@ -1,13 +1,11 @@
-# Custom rules for demonstration
-
 # Rule for unauthorized system modification (Risk #1)
-alert tcp any any -> $HOME_NET any (msg:"SUSPICIOUS Config File Modification Attempt"; content:"config"; content:"modify"; distance:0; within:50; classtype:attempted-admin; sid:5000001; rev:1;)
+alert tcp any any -> $HOME_NET any (msg:"SUSPICIOUS Config File Modification Attempt"; content:"config"; content:"modify"; distance:0; within:50; classtype:attempted-admin; sid:5000001; rev:2;)
 
-# Rule for database service disruption (Risk #4)
-alert tcp any any -> $HOME_NET 3306 (msg:"POTENTIAL MySQL DDoS Attack"; flags:S; threshold:type threshold, track by_src, count 60, seconds 10; classtype:attempted-dos; sid:5000002; rev:1;)
+# Rule for database service disruption (Risk #4) - Lower detection threshold
+alert tcp any any -> $HOME_NET 3306 (msg:"POTENTIAL MySQL DDoS Attack"; flags:S; threshold:type threshold, track by_src, count 20, seconds 5; classtype:attempted-dos; sid:5000002; rev:2;)
 
-# Rule for API service disruption (Risk #10)
-alert tcp any any -> $HOME_NET 80 (msg:"CRITICAL Buffer Overflow Attempt at API Endpoint"; content:"/api/"; content:"%00"; distance:0; pcre:"/(%[0-9a-fA-F]{2}){20,}/"; classtype:web-application-attack; sid:5000003; rev:1;)
+# Rule for API service disruption (Risk #10) - More aggressive detection
+alert tcp any any -> $HOME_NET 80 (msg:"CRITICAL Buffer Overflow Attempt at API Endpoint"; content:"/api/"; content:"%00"; distance:0; pcre:"/(%[0-9a-fA-F]{2}){10,}/"; classtype:web-application-attack; sid:5000003; rev:2;)
 
 # Additional rules for demonstration
 alert http any any -> $HOME_NET any (msg:"SUSPICIOUS SQL Injection Attempt"; content:"SELECT"; nocase; content:"FROM"; distance:0; nocase; content:"WHERE"; distance:0; nocase; classtype:web-application-attack; sid:5000004; rev:1;)
@@ -18,3 +16,7 @@ alert http any any -> $HOME_NET 80 (msg:"SUSPICIOUS Command Injection Attempt"; 
 alert http any any -> $HOME_NET 80 (msg:"NGINX - Possible Directory Traversal"; content:".."; pcre:"/\.\.(%2f|%5c|\x2f|\x5c)/i"; classtype:web-application-attack; sid:5000006; rev:1;)
 
 alert http any any -> $HOME_NET 80 (msg:"NGINX - Suspicious File Access"; content:"/etc/passwd"; classtype:attempted-admin; sid:5000007; rev:1;)
+
+
+drop tcp any any -> 172.18.0.30 3306 (msg:"MySQL Unauthorized Access Attempt"; flow:to_server; sid:1000001; rev:1;)
+drop tcp any any -> 172.18.0.40 80 (msg:"Nginx Attack Detected"; content:"malicious"; http_uri; sid:1000002; rev:1;)
